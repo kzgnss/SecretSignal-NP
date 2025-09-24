@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Thapa Dai — 1XBET HACKBOT</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0f14; --card:#0f1520; --line:rgba(255,255,255,.08);
+  --neon:#60f7a2; --vio:#7c7cff; --text:#dbe7ff;
+}
+html,body{height:100%}
+body{
+  color:var(--text); overflow-x:hidden; background:
+    radial-gradient(1200px 600px at 12% -10%, rgba(124,124,255,.18), transparent),
+    radial-gradient(1200px 600px at 110% 0%, rgba(96,247,162,.14), transparent),
+    var(--bg);
+}
+.wrap{max-width:1100px}
+.glass{background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.card{
+  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+  border:1px solid var(--line); border-radius:16px; backdrop-filter:blur(6px); transition:.25s
+}
+.card:hover{ box-shadow:0 10px 30px rgba(0,0,0,.25), inset 0 0 0 2px rgba(124,124,255,.10) }
+.btn{
+  border:1px solid rgba(96,247,162,.45); color:#e8fff0;
+  background:linear-gradient(180deg, rgba(96,247,162,.22), rgba(96,247,162,.12));
+  padding:.75rem 1.1rem; border-radius:12px; transition:.18s
+}
+.btn:hover{ box-shadow:0 0 0 4px rgba(96,247,162,.14), 0 0 24px rgba(96,247,162,.35) inset; transform:translateY(-1px) }
+.btn:disabled{ opacity:.55; cursor:not-allowed }
+.btn-ghost{ border:1px solid rgba(124,124,255,.35); background:rgba(124,124,255,.10); color:#EAEAFE; padding:.7rem 1rem; border-radius:12px }
+.chip{ border:1px solid rgba(124,124,255,.4); background:rgba(124,124,255,.14); color:#eaeafe; border-radius:999px; padding:.25rem .6rem; font-size:.8rem }
+.console-surface{background:rgba(0,0,0,.30);border:1px solid rgba(255,255,255,.06); border-radius:12px;backdrop-filter:blur(3px)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+.hidden{display:none}
+
+/* FX */
+.fx-dot{position:fixed;top:-8px;width:3px;height:3px;background:rgba(124,124,255,.8);border-radius:9999px;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(120vh)}}
+
+/* Modal */
+.modal-overlay{
+  position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center;
+  background: radial-gradient(500px 300px at 50% 30%, rgba(96,247,162,.12), transparent), rgba(7,10,14,.78);
+  animation: fadeIn .25s ease both
+}
+.modal{ width:min(92vw, 660px); outline:none; transform:translateY(10px) scale(.98); animation: popIn .25s ease .05s both }
+.modal-card{ background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border:1px solid rgba(124,124,255,.28); border-radius:18px; box-shadow:0 10px 40px rgba(0,0,0,.45) }
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{to{transform:none}}
+
+/* Chicken */
+@keyframes chicken-walk { 0%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-5px) rotate(2deg)} 100%{transform:translateY(0) rotate(-2deg)} }
+.chicken-stage{ background-color:#2a2a2a; border-radius:10px; padding:20px 0; position:relative; height:320px; display:flex; align-items:center; border:1px solid rgba(255,255,255,.06); overflow-x:auto; scroll-behavior:smooth }
+.chicken-stage::-webkit-scrollbar{ display:none }
+.chicken-path{ display:flex; align-items:center; height:100%; position:relative }
+.chicken-step{ display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; width:150px; flex-shrink:0 }
+.chicken-circle{ width:110px; height:110px; border-radius:50%; background:#333; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:22px; color:#fff; border:6px solid #444; transition:.35s }
+.chicken-step.passed{ opacity:.6 }
+.chicken-step.active .chicken-circle{ background:#00cc66; transform:scale(1.08); box-shadow:0 0 26px #00cc66 }
+.chicken-grate{ width:100px; height:52px; background:#111; border-radius:5px; margin-top:58px; border-top:5px solid #222 }
+#chickenChar{ position:absolute; width:88px; height:88px; z-index:10; bottom:110px; left:30px; transition:left .5s ease-in-out }
+#chickenChar.walking{ animation: chicken-walk .5s infinite }
+
+/* grid cells */
+.cell{display:flex;align-items:center;justify-content:center;border:1px solid var(--line); border-radius:12px;background:rgba(255,255,255,.04);transition:.15s}
+.cell-sm{width:56px;height:56px}
+</style>
+</head>
+<body class="min-h-screen selection:bg-emerald-500/20 selection:text-emerald-100">
+<div id="fxLayer" aria-hidden="true"></div>
+
+<header class="sticky top-0 z-40 border-b border-white/5 glass">
+  <div class="wrap mx-auto px-4 h-14 flex items-center justify-between">
+    <div class="font-semibold text-base sm:text-lg">
+      <span class="text-green-300">Thapa Dai</span>
+      <span class="text-gray-400"> // </span>
+      <span class="text-indigo-300">1XBET HACKBOT</span>
+    </div>
+    <a class="chip hover:opacity-90" href="https://t.me/ThapaDaiSignals_bot" target="_blank" rel="noopener">@ThapaDaiSignals_bot</a>
+  </div>
+</header>
+
+<main class="wrap mx-auto px-4 py-6 md:py-8">
+  <!-- Game cards -->
+  <section id="gamesGrid">
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <article class="card p-6 flex flex-col" data-game="aviatrix">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">Aviator</h3>
+          <span class="chip mono" id="chip-aviatrix">0/100</span>
+        </div>
+        <div class="mt-4"><button class="btn" data-open>Open</button></div>
+      </article>
+
+      <article class="card p-6 flex flex-col" data-game="mines">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">Mines</h3>
+          <span class="chip mono" id="chip-mines">0/100</span>
+        </div>
+        <div class="mt-4"><button class="btn" data-open>Open</button></div>
+      </article>
+
+      <article class="card p-6 flex flex-col" data-game="penalty">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">Penalty</h3>
+          <span class="chip mono" id="chip-penalty">0/100</span>
+        </div>
+        <div class="mt-4"><button class="btn" data-open>Open</button></div>
+      </article>
+
+      <article class="card p-6 flex flex-col" data-game="chicken">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">Chicken Road</h3>
+          <span class="chip mono" id="chip-chicken">0/100</span>
+        </div>
+        <div class="mt-4"><button class="btn" data-open>Open</button></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Play area -->
+  <section id="playArea" class="mt-8">
+    <div class="card p-6">
+      <h4 id="playTitle" class="text-xl font-semibold mb-4">Choose game</h4>
+      <div id="playContent"></div>
+    </div>
+    <div class="mt-6">
+      <h4 class="font-semibold mb-2">Console Log</h4>
+      <div class="console-surface p-3 h-48 overflow-auto">
+        <pre id="logBox" class="mono text-sm whitespace-pre-wrap"></pre>
+      </div>
+    </div>
+  </section>
+</main>
+<!-- Modals -->
+<!-- Gate (password 1: 2508) -->
+<div id="gateModal" class="modal-overlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" tabindex="-1">
+    <div class="modal-card p-6 md:p-7">
+      <h2 class="text-2xl md:text-3xl font-semibold mb-2">Enter password</h2>
+      <p class="text-blue-100/90 mb-3">
+        <span class="mono">You need to create an account using (promo code: NP61) to obtain a password.</span>
+      </p>
+      <a class="btn inline-flex items-center gap-2 focus-ring mb-4"
+         href="https://reffpa.com/L?tag=d_4315540m_32273c_&site=4315540&ad=32273&r=registration" target="_blank" rel="noopener">
+        Create an account 
+      </a>
+      <div class="mt-1 flex flex-col sm:flex-row gap-3">
+        <input id="gatePass" inputmode="numeric"
+               class="w-full sm:w-56 bg-gray-900 text-gray-100 border border-white/10 rounded-lg px-4 py-3 mono"
+               placeholder="••••">
+        <button id="gateBtn" class="btn sm:w-40 focus-ring">Confirm</button>
+      </div>
+      <p id="gateErr" class="text-rose-300 text-sm mt-2 hidden">Incorrect password</p>
+    </div>
+  </div>
+</div>
+
+<!-- ID (139XXXXXXX, ровно 10 цифр) -->
+<div id="idModal" class="modal-overlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" tabindex="-1">
+    <div class="modal-card p-6 md:p-7">
+      <h2 class="text-2xl md:text-3xl font-semibold mb-2">Enter your 1xBet ID</h2>
+      <p class="text-blue-100/85 mb-3">
+        Your ID must be in the format <span class="mono">139XXXXXXX</span> (exactly 10 digits).
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input id="idInput" inputmode="numeric"
+               class="w-full sm:w-72 bg-gray-900 text-gray-100 border border-white/10 rounded-lg px-4 py-3 mono"
+               placeholder="139XXXXXXX">
+        <button id="idSave" class="btn sm:w-40" disabled>Save</button>
+      </div>
+      <p id="idErr" class="text-rose-300 text-sm mt-2 hidden">Invalid ID</p>
+    </div>
+  </div>
+</div>
+
+<!-- Not enough funds + password 2 (08255) -->
+<div id="fundsModal" class="modal-overlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" tabindex="-1">
+    <div class="modal-card p-6 md:p-7">
+      <h2 class="text-2xl md:text-3xl font-semibold mb-2">Insufficient balance</h2>
+      <p class="text-blue-100/90">
+        You need at least. <span class="mono">800 NPR</span>
+      </p>
+      <p class="text-blue-100/90 mb-3">
+        Please make a single deposit of <span class="mono">800 NPR</span>
+      </p>
+      <a class="btn inline-flex items-center gap-2 focus-ring mb-4"
+         href="https://t.me/Lakan_Hack_bot" target="_blank" rel="noopener">
+        Contact to @ThapaDaiSignals_bot
+      </a>
+
+      <div class="mt-2 flex flex-col sm:flex-row gap-3">
+        <input id="fundsPass" inputmode="numeric"
+               class="w-full sm:w-56 bg-gray-900 text-gray-100 border border-white/10 rounded-lg px-4 py-3 mono"
+               placeholder="••••">
+        <button id="fundsBtn" class="btn sm:w-40 focus-ring">Confirm</button>
+      </div>
+      <p id="fundsErr" class="text-rose-300 text-sm mt-2 hidden">Incorrect password</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================== CONFIG ===================== */
+const CONFIG = {
+  FIRST_PASS: '2508',     // первый пароль
+  FUNDS_PASS: '08255',    // второй пароль
+  LIMIT_PER_GAME: 30       // лимит сигналов/коэф. на игру
+};
+
+/* ===================== Storage / State ===================== */
+const LS_KEY = 'ss_state_v11';
+if (location.search.includes('reset=1')) localStorage.removeItem(LS_KEY);
+
+const load = () => { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch { return {}; } };
+const save = (obj) => localStorage.setItem(LS_KEY, JSON.stringify(obj));
+
+let State = Object.assign({
+  firstUnlocked: false,
+  hasId: false,
+  idValue: null,
+  fundsUnlocked: false,
+  used: { aviatrix: 0, mines: 0, penalty: 0, chicken: 0 },
+}, load());
+
+/* ===================== Utils ===================== */
+const rnd = (a,b)=> Math.random()*(b-a)+a;
+const rndInt = (a,b)=> Math.floor(Math.random()*(b-a+1))+a;
+const ts = ()=>{ const d=new Date(); const p=n=>String(n).padStart(2,'0'); return `[${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}]`; };
+
+function writeLog(s){
+  const log = document.getElementById('logBox');
+  const lines = (log.textContent||'').split('\n').filter(Boolean);
+  lines.push(s);
+  while(lines.length>200) lines.shift();
+  log.textContent = lines.join('\n');
+  log.scrollTop = log.scrollHeight;
+}
+function open(mod){ mod.style.display='flex'; }
+function close(mod){ mod.style.display='none'; }
+
+function updateChips(){
+  document.getElementById('chip-aviatrix').textContent = `${State.used.aviatrix}/${CONFIG.LIMIT_PER_GAME}`;
+  document.getElementById('chip-mines').textContent    = `${State.used.mines}/${CONFIG.LIMIT_PER_GAME}`;
+  document.getElementById('chip-penalty').textContent  = `${State.used.penalty}/${CONFIG.LIMIT_PER_GAME}`;
+  document.getElementById('chip-chicken').textContent  = `${State.used.chicken}/${CONFIG.LIMIT_PER_GAME}`;
+}
+
+/* ===================== Gating ===================== */
+const elGate   = {
+  modal: document.getElementById('gateModal'),
+  pass:  document.getElementById('gatePass'),
+  btn:   document.getElementById('gateBtn'),
+  err:   document.getElementById('gateErr'),
+};
+const elId     = {
+  modal: document.getElementById('idModal'),
+  input: document.getElementById('idInput'),
+  save:  document.getElementById('idSave'),
+  err:   document.getElementById('idErr'),
+};
+const elFunds  = {
+  modal: document.getElementById('fundsModal'),
+  pass:  document.getElementById('fundsPass'),
+  btn:   document.getElementById('fundsBtn'),
+  err:   document.getElementById('fundsErr'),
+};
+
+function ensureUnlocked(beforeOpenGameCallback){
+  if(!State.firstUnlocked){ open(elGate.modal); return false; }
+  if(!State.hasId){ open(elId.modal); return false; }
+  if(!State.fundsUnlocked){
+    // покажем окно средств, а после успешного ввода — вернёмся к открытию игры
+    open(elFunds.modal);
+    if (typeof beforeOpenGameCallback === 'function') {
+      elFunds.btn._afterUnlock = beforeOpenGameCallback; // привяжем разовое действие
+    }
+    return false;
+  }
+  return true;
+}
+
+/* first pass */
+elGate.btn.addEventListener('click', ()=>{
+  const v=(elGate.pass.value||'').trim();
+  if(v===CONFIG.FIRST_PASS){
+    State.firstUnlocked = true;
+    save(State);
+    elGate.err.classList.add('hidden');
+    close(elGate.modal);
+    open(elId.modal);
+    setTimeout(()=>elId.input.focus(), 50);
+  }else{
+    elGate.err.classList.remove('hidden');
+  }
+});
+elGate.pass.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); elGate.btn.click(); }});
+
+/* id (strict: 139 + 7 digits = 10) */
+const ID_RE = /^139\d{7}$/;
+elId.input.addEventListener('input', ()=>{
+  const v = (elId.input.value||'').replace(/\D+/g,'').slice(0,10);
+  elId.input.value = v;
+  elId.save.disabled = !ID_RE.test(v);
+});
+elId.input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); elId.save.click(); }});
+elId.save.addEventListener('click', ()=>{
+  const v=(elId.input.value||'').trim();
+  if(ID_RE.test(v)){
+    State.hasId = true; State.idValue = v;
+    save(State);
+    elId.err.classList.add('hidden');
+    close(elId.modal);
+    // ВАЖНО: fundsModal теперь НЕ открываем здесь!
+  }else{
+    elId.err.classList.remove('hidden');
+  }
+});
+
+/* funds pass (всплывает только по клику на игру) */
+elFunds.btn.addEventListener('click', ()=>{
+  const v=(elFunds.pass.value||'').trim();
+  if(v===CONFIG.FUNDS_PASS){
+    State.fundsUnlocked = true;
+    save(State);
+    elFunds.err.classList.add('hidden');
+    close(elFunds.modal);
+
+    // если был запрошен рендер игры — выполняем после разблокировки
+    if (typeof elFunds.btn._afterUnlock === 'function') {
+      const fn = elFunds.btn._afterUnlock;
+      elFunds.btn._afterUnlock = null;
+      setTimeout(fn, 50);
+    }
+  }else{
+    elFunds.err.classList.remove('hidden');
+  }
+});
+elFunds.pass.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); elFunds.btn.click(); }});
+
+/* restore modals on load */
+(function restore(){
+  updateChips();
+  if(!State.firstUnlocked){ open(elGate.modal); return; }
+  if(State.firstUnlocked && !State.hasId){ open(elId.modal); return; }
+  // fundsModal НЕ открываем тут — только при клике на игру
+})();
+
+/* ===================== Play Area renderers ===================== */
+const playTitle = document.getElementById('playTitle');
+const playContent = document.getElementById('playContent');
+
+function buildGrid(container, n){
+  container.innerHTML='';
+  for(let i=0;i<n;i++){
+    const d=document.createElement('div');
+    d.className='cell cell-sm text-xl select-none';
+    container.appendChild(d);
+  }
+}
+
+function renderAviatrix(){
+  playTitle.textContent='Aviatrix';
+  playContent.innerHTML = `
+    <div class="flex items-center gap-4">
+      <button id="axGet" class="btn">🔹 Get Signal</button>
+      <div id="axOut" class="chip mono text-2xl px-4 py-2">—</div>
+    </div>
+  `;
+  const btn=document.getElementById('axGet');
+  const out=document.getElementById('axOut');
+  if(State.used.aviatrix>=CONFIG.LIMIT_PER_GAME) btn.disabled=true;
+
+  btn.addEventListener('click', ()=>{
+    if(State.used.aviatrix>=CONFIG.LIMIT_PER_GAME) return;
+
+    const high = Math.random() < 0.10; // 10% big
+    const val  = high ? rnd(9.65,56.00) : rnd(2.14,9.64);
+    const txt  = (Math.round(val*100)/100).toFixed(2)+'x';
+
+    out.textContent = txt;
+    State.used.aviatrix++; updateChips(); save(State);
+    if(State.used.aviatrix>=CONFIG.LIMIT_PER_GAME) btn.disabled=true;
+    writeLog(`${ts()} AVIATRIX → ${txt}`);
+  });
+}
+
+function renderMines(){
+  playTitle.textContent='Mines (5×5)';
+  playContent.innerHTML = `
+    <div class="flex flex-col gap-4">
+      <div><button id="mGet" class="btn">Get signal</button></div>
+      <div class="flex justify-center"><div id="minesGrid" class="grid grid-cols-5 gap-3"></div></div>
+    </div>
+  `;
+  const grid=document.getElementById('minesGrid');
+  buildGrid(grid,25);
+
+  const btn=document.getElementById('mGet');
+  if(State.used.mines>=CONFIG.LIMIT_PER_GAME) btn.disabled=true;
+
+  btn.addEventListener('click', ()=>{
+    if(State.used.mines>=CONFIG.LIMIT_PER_GAME) return;
+
+    const cells=[...grid.children];
+    cells.forEach(c=>{ c.textContent=''; c.style.boxShadow='none'; });
+    const mines=new Set(); while(mines.size<3) mines.add(rndInt(0,24));
+    mines.forEach(i=>{ const c=cells[i]; c.textContent='💥'; c.style.boxShadow='0 0 0 2px rgba(255,80,80,.45) inset'; });
+
+    State.used.mines++; updateChips(); save(State);
+    if(State.used.mines>=CONFIG.LIMIT_PER_GAME) btn.disabled=true;
+    writeLog(`${ts()} MINES → bombs at ${[...mines].map(i=>i+1).join(',')}`);
+  });
+}
+
+function renderPenalty(){
+  playTitle.textContent='Penalty (4×6)';
+  playContent.innerHTML = `
+    <div class="flex flex-col gap-4">
+      <div><button id="pGet" class="btn">Get signal</button></div>
+      <div class="flex justify-center"><div id="penaltyGrid" class="grid grid-cols-6 gap-3"></div></div>
+    </div>
+  `;
+  const grid=document.getElementById('penaltyGrid');
+  buildGrid(grid,24);
+
+  const btn=document.getElementById('pGet');
+  if(State.used.penalty>=CONFIG.LIMIT_PER_GAME) btn.disabled=true;
+
+  btn.addEventListener('click', ()=>{
+    if(State.used.penalty>=CONFIG.LIMIT_PER_GAME) return;
+
+    const cells=[...grid.children];
+    cells.forEach(c=>{ c.textContent=''; c.style.boxShadow='none'; });
+
+    const idx=rndInt(0,23);
+    const cell=cells[idx];
+    cell.textContent='⚽️';
+    cell.style.boxShadow='0 0 0 2px rgba(124,124,255,.45) inset';
+
+    State.used.penalty++; updateChips(); save(State);
+    if(State.used.penalty>=CONFIG.LIMIT_PER_GAME) btn.disabled=true;
+    writeLog(`${ts()} PENALTY → shoot at ${idx+1}`);
+  });
+}
+
+function renderChicken(){
+  playTitle.textContent='Chicken Road';
+  playContent.innerHTML = `
+    <div class="flex items-center gap-3 mb-4">
+      <span class="chip">Signal: <span id="chSignalNum" class="mono font-bold px-1">0</span></span>
+      <button id="cGet" class="btn">Get signal</button>
+    </div>
+    <div class="chicken-stage" id="chStage">
+      <div id="chPath" class="chicken-path"></div>
+      <img id="chickenChar" src="https://iili.io/FvIoXhg.webp" alt="chicken">
+    </div>
+  `;
+
+  const ch = {
+    stage: document.getElementById('chStage'),
+    path:  document.getElementById('chPath'),
+    char:  document.getElementById('chickenChar'),
+    sig:   document.getElementById('chSignalNum'),
+    stepWidth:150, charWidth:88, maxSteps:24, steps:0
+  };
+
+  function build(){
+    ch.path.innerHTML='';
+    const start=document.createElement('div');
+    start.className='chicken-step';
+    start.innerHTML='<div class="chicken-grate"></div>';
+    ch.path.appendChild(start);
+    for(let i=0;i<ch.maxSteps;i++){
+      const d=document.createElement('div');
+      d.className='chicken-step'; d.dataset.index=String(i);
+      d.innerHTML=`<div class="chicken-circle">${i+1}</div><div class="chicken-grate"></div>`;
+      ch.path.appendChild(d);
+    }
+  }
+  function update(){
+    const left=(ch.stepWidth*ch.steps)+(ch.stepWidth/2)-(ch.charWidth/2);
+    ch.char.style.left=left+'px';
+    const cam=Math.max(0,left-(ch.charWidth*1.5));
+    ch.stage.scroll({left:cam,behavior:'smooth'});
+    const active=ch.steps-1;
+    [...ch.path.querySelectorAll('.chicken-step')].forEach(step=>{
+      const idx=step.dataset.index!==undefined?parseInt(step.dataset.index):-1;
+      step.classList.remove('active','passed');
+      if(idx===active) step.classList.add('active');
+      else if(idx<active && idx!==-1) step.classList.add('passed');
+    });
+  }
+  async function simulate(n){
+    ch.char.classList.add('walking');
+    for(let i=0;i<n;i++){
+      if(ch.steps>=ch.maxSteps) break;
+      ch.steps++; update();
+      await new Promise(r=>setTimeout(r, 600));
+    }
+    ch.char.classList.remove('walking');
+  }
+  function resetToStart(){
+    ch.steps=0; build();
+    const startLeft=(ch.stepWidth/2)-(ch.charWidth/2);
+    ch.char.style.transition='none'; ch.char.style.left=startLeft+'px';
+    setTimeout(()=>{ ch.char.style.transition='left .5s ease-in-out'; },20);
+    ch.stage.scrollLeft=0; ch.sig.textContent='0'; update();
+  }
+  resetToStart();
+
+  const btn=document.getElementById('cGet');
+  if(State.used.chicken>=CONFIG.LIMIT_PER_GAME) btn.disabled=true;
+
+  btn.addEventListener('click', ()=>{
+    if(State.used.chicken>=CONFIG.LIMIT_PER_GAME) return;
+
+    resetToStart(); // каждый сигнал — старт с нуля
+    const steps = rndInt(3, Math.floor(ch.maxSteps*0.7)); // 3..~16
+    ch.sig.textContent = String(steps);
+    simulate(steps);
+
+    State.used.chicken++; updateChips(); save(State);
+    if(State.used.chicken>=CONFIG.LIMIT_PER_GAME) btn.disabled=true;
+    writeLog(`${ts()} CHICKEN → signal ${steps} steps`);
+  });
+}
+
+/* открытие игры из карточки (здесь подхватываем fundsModal при необходимости) */
+document.querySelectorAll('[data-open]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    // если не пройдены первые шаги — покажем соответствующую модалку
+    if(!State.firstUnlocked){ open(elGate.modal); return; }
+    if(!State.hasId){ open(elId.modal); return; }
+
+    const game = btn.closest('[data-game]').getAttribute('data-game');
+
+    const openGame = ()=>{
+      if(game==='aviatrix') renderAviatrix();
+      if(game==='mines')    renderMines();
+      if(game==='penalty')  renderPenalty();
+      if(game==='chicken')  renderChicken();
+    };
+
+    // если не разблокированы средства — спросим второй пароль прямо сейчас
+    if(!State.fundsUnlocked){
+      open(elFunds.modal);
+      elFunds.btn._afterUnlock = openGame; // после успешного ввода — открыть выбранную игру
+      return;
+    }
+
+    // иначе просто открыть игру
+    openGame();
+  });
+});
+
+/* activity console filler */
+setInterval(()=>{
+  if(!State.fundsUnlocked) return;
+  const g=['Aviatrix','Mines','Penalty','Chicken'][rndInt(0,3)];
+  writeLog(`${ts()} Activity → ${g}`);
+}, rndInt(1100,1700));
+
+/* show first modal if needed on very first load */
+if(!State.firstUnlocked) open(elGate.modal);
+</script>
+</body>
+</html>
